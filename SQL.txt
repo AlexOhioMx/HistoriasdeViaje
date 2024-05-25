@@ -1,0 +1,12 @@
+CREATE DATABASE Android;
+
+USE Android;
+
+CREATE TABLE Usuarios (
+    UsuarioID INT PRIMARY KEY AUTO_INCREMENT,
+    NombreUsuario VARCHAR(255) NOT NULL,
+    Nombre VARCHAR(255),
+    Contrasena VARCHAR(255) NOT NULL
+);
+
+
