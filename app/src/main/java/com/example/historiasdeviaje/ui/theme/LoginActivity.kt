@@ -22,6 +22,7 @@ class LoginActivity : AppCompatActivity() {
         val nombreUsuario = findViewById<EditText>(R.id.nombre_usuario)
         val contrasena = findViewById<EditText>(R.id.contrasena)
         val botonIniciarSesion = findViewById<Button>(R.id.boton_iniciar_sesion)
+        val botonRegistrar = findViewById<Button>(R.id.boton_registrar) // Obtener el botón Registrar
 
         botonIniciarSesion.setOnClickListener {
             val dataToSend = JSONObject()
@@ -30,13 +31,18 @@ class LoginActivity : AppCompatActivity() {
 
             SendDataTask().execute(dataToSend.toString())
         }
+        botonRegistrar.setOnClickListener {
+            val intent = Intent(this, RegistroActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     inner class SendDataTask : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String {
             var response = ""
             try {
-                val url = URL("http://192.168.1.20:80/inicio_sesion.php")
+                //Cambia la url por el de tu linux
+                val url = URL("http://192.168.0.38:80/inicio_sesion.php")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json;charset=utf-8")

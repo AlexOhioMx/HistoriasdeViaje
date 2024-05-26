@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 import java.io.OutputStreamWriter
@@ -22,6 +23,8 @@ class RegistroActivity : AppCompatActivity() {
         val nombre = findViewById<EditText>(R.id.nombre)
         val contrasena = findViewById<EditText>(R.id.contrasena)
         val botonRegistrar = findViewById<Button>(R.id.boton_registrar)
+        val botonYaTengoCuenta = findViewById<Button>(R.id.boton_ya_tengo_cuenta)
+
 
         botonRegistrar.setOnClickListener {
             val dataToSend = JSONObject()
@@ -31,13 +34,18 @@ class RegistroActivity : AppCompatActivity() {
 
             SendDataTask().execute(dataToSend.toString())
         }
+        botonYaTengoCuenta.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     inner class SendDataTask : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String {
             var response = ""
             try {
-                val url = URL("http://192.168.1.20:80/registro_usuario.php")
+                //Cambia la url también
+                val url = URL("http://192.168.0.38:80/registro_usuario.php")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json;charset=utf-8")

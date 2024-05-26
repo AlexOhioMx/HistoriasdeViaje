@@ -16,15 +16,7 @@
         android:theme="@style/Theme.HistoriasdeViaje"
         tools:targetApi="31">
         <activity
-            android:name=".ui.theme.ui.theme.VistaPrincipal"
-            android:exported="false" />
-        <activity
-            android:name=".ui.theme.VistaPrinciapal"
-            android:exported="false"
-            android:label="@string/title_activity_vista_princiapal"
-            android:theme="@style/Theme.HistoriasdeViaje" />
-        <activity
-            android:name=".ui.theme.RegistroActivity"
+            android:name=".ui.theme.LoginActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.HistoriasdeViaje">
@@ -34,7 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.theme.LoginActivity" />
+            <activity android:name=".ui.theme.RegistroActivity" />
         <activity
             android:name=".ui.theme.PublicarHistoriaActivity"
             android:exported="true"
