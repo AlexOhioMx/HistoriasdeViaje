@@ -10,78 +10,78 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Regístrate Ahora!"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
-        android:gravity="center_horizontal"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/input_container"/>
+        app:layout_constraintBottom_toTopOf="@+id/nombre_usuario_layout"/>
 
-    <LinearLayout
-        android:id="@+id/input_container"
-        android:layout_width="0dp"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nombre_usuario_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:hint="Nombre de usuario"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/title"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3">
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/nombre_usuario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nombre_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nombre"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/nombre_usuario_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/nombre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/contrasena_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Contraseña"
+        app:endIconMode="password_toggle"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/nombre_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/contrasena"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nombre de usuario"
-            android:textColorHint="@color/black">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/nombre_usuario"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Nombre"
-            android:textColorHint="@color/black">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/nombre"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Contraseña"
-            android:textColorHint="@color/black"
-            app:endIconMode="password_toggle">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/contrasena"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword" />
-        </com.google.android.material.textfield.TextInputLayout>
-    </LinearLayout>
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/boton_registrar"
+        style="@style/Widget.MaterialComponents.Button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
         android:text="Registrar"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/input_container"
-        app:layout_constraintStart_toStartOf="@+id/input_container"
-        app:layout_constraintTop_toBottomOf="@+id/input_container" />
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contrasena_layout" />
 
     <TextView
         android:id="@+id/no_account_text"
@@ -89,9 +89,10 @@
         android:layout_height="wrap_content"
         android:text="¿Ya tienes cuenta?"
         android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toStartOf="@+id/boton_ya_tengo_cuenta"
+        app:layout_constraintTop_toBottomOf="@+id/boton_registrar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/boton_registrar" />
+        app:layout_constraintEnd_toStartOf="@+id/boton_ya_tengo_cuenta"
+        app:layout_constraintHorizontal_bias="0.5"/>
 
     <Button
         android:id="@+id/boton_ya_tengo_cuenta"
@@ -99,13 +100,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Iniciar Sesión"
+        app:layout_constraintTop_toTopOf="@+id/no_account_text"
         app:layout_constraintBottom_toBottomOf="@+id/no_account_text"
         app:layout_constraintStart_toEndOf="@+id/no_account_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/no_account_text" />
-
-
-
-
-
+        app:layout_constraintHorizontal_bias="0.5"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
