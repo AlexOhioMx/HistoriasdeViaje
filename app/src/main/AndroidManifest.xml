@@ -22,11 +22,10 @@
             android:theme="@style/Theme.HistoriasdeViaje">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-            <activity android:name=".ui.theme.RegistroActivity" />
+        <activity android:name=".ui.theme.RegistroActivity" />
         <activity
             android:name=".ui.theme.PublicarHistoriaActivity"
             android:exported="true"
