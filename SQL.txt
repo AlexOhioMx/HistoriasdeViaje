@@ -9,4 +9,11 @@ CREATE TABLE Usuarios (
     Contrasena VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE Historias (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    imagen LONGBLOB
+);
+select * from Historias;
 

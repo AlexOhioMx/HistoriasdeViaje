@@ -31,13 +31,30 @@
         app:layout_constraintTop_toBottomOf="@id/descripcion_historia"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+    <Button
+        android:id="@+id/boton_ver_historias"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ver historia de bd"
+        app:layout_constraintTop_toBottomOf="@id/boton_subir_fotos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/boton_tomar_foto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tomar Foto"
+        app:layout_constraintTop_toBottomOf="@id/boton_ver_historias"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/imagen_historia"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
-        app:layout_constraintTop_toBottomOf="@id/boton_subir_fotos"
+        app:layout_constraintTop_toBottomOf="@id/boton_tomar_foto"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
