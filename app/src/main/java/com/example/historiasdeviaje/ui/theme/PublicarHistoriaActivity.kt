@@ -1,9 +1,14 @@
 package com.example.historiasdeviaje.ui.theme
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
@@ -16,6 +21,8 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.example.historiasdeviaje.R
 import org.json.JSONObject
@@ -24,9 +31,12 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-class PublicarHistoriaActivity : AppCompatActivity() {
+class PublicarHistoriaActivity : AppCompatActivity(), LocationListener {
+    private lateinit var locationManager: LocationManager // Variable para la ubicación
     private val REQUEST_CODE = 0
     private var uriFoto: Uri? = null
+
+    private val locationPermissionCode = 2 // Variable para los permisos de la ubicación
 
     lateinit var tituloHistoria: EditText
     lateinit var descripcionHistoria: EditText
@@ -88,17 +98,13 @@ class PublicarHistoriaActivity : AppCompatActivity() {
                 val descripcion = descripcionHistoria.text.toString()
 
                 insertarPublicacion(titulo, descripcion, imagenBase64)
-
-                val intent = Intent(this, VerHistoriaActivity::class.java).apply {
-                    putExtra("TITULO", titulo)
-                    putExtra("DESCRIPCION", descripcion)
-                    putExtra("URI_FOTO", uriFoto.toString())
-                }
-                startActivity(intent)
             } else {
                 Toast.makeText(this, "Por favor, selecciona una imagen", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // Solicitar la ubicación
+        getLocation()
     }
 
     private fun abrirCamara() {
@@ -120,6 +126,8 @@ class PublicarHistoriaActivity : AppCompatActivity() {
                 put("titulo", titulo)
                 put("descripcion", descripcion)
                 put("imagen", imagenBase64)
+                put("latitud", currentLatitude) // Agrega latitud
+                put("longitud", currentLongitude) // Agrega longitud
             }.toString()
         )
     }
@@ -128,7 +136,7 @@ class PublicarHistoriaActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String?): String {
             var response = ""
             try {
-                val url = URL("http://192.168.1.20:80/insertar_publicacion.php") // Reemplaza con tu IP
+                val url = URL("http://192.168.0.12:80/insertar_publicacion.php") // Reemplaza con tu IP
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
@@ -157,7 +165,13 @@ class PublicarHistoriaActivity : AppCompatActivity() {
             val jsonResponse = JSONObject(result)
             if (jsonResponse.optString("status") == "Success") {
                 // Publicación exitosa, redirige a VerHistoriaActivity
-                val intent = Intent(this@PublicarHistoriaActivity, VerHistoriaActivity::class.java)
+                val intent = Intent(this@PublicarHistoriaActivity, VerHistoriaActivity::class.java).apply {
+                    putExtra("titulo", tituloHistoria.text.toString())
+                    putExtra("descripcion", descripcionHistoria.text.toString())
+                    putExtra("imagenUri", uriFoto.toString())
+                    putExtra("latitud", jsonResponse.optDouble("latitud"))
+                    putExtra("longitud", jsonResponse.optDouble("longitud"))
+                }
                 startActivity(intent)
             } else {
                 // Hubo un error, muestra el mensaje en un Toast
@@ -179,5 +193,45 @@ class PublicarHistoriaActivity : AppCompatActivity() {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
         val path = MediaStore.Images.Media.insertImage(contentResolver, bitmap, "Title", null)
         return Uri.parse(path.toString())
+    }
+
+    // Variables para almacenar la latitud y longitud actuales
+    private var currentLatitude: Double = 0.0
+    private var currentLongitude: Double = 0.0
+
+    // Método para obtener la ubicación
+    private fun getLocation() {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), locationPermissionCode)
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000,
+                5f, this)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == locationPermissionCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permiso concedido", Toast.LENGTH_SHORT).show()
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return
+                }
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000,
+                    5f, this)
+            } else {
+                Toast.makeText(this, "Permiso denegado", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onLocationChanged(location: Location) {
+        currentLatitude = location.latitude
+        currentLongitude = location.longitude
     }
 }

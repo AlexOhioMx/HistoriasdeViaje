@@ -1,5 +1,7 @@
 package com.example.historiasdeviaje.ui.theme
 
+import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
@@ -8,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -25,7 +28,9 @@ data class Historia(
     val historiaId: Int,
     val titulo: String,
     val descripcion: String,
-    val imagenBase64: String
+    val imagenBase64: String,
+    val latitud: Double, // Agrega la propiedad latitud
+    val longitud: Double // Agrega la propiedad longitud
 )
 
 class VerHistoriaActivity : AppCompatActivity() {
@@ -47,7 +52,7 @@ class VerHistoriaActivity : AppCompatActivity() {
 
     inner class ObtenerHistoriasTask : AsyncTask<Void, Void, String>() {
         override fun doInBackground(vararg params: Void?): String {
-            val urlString = "http://192.168.1.20:80/obtener_historia.php" // Reemplaza con tu IP
+            val urlString = "http://192.168.0.12:80/obtener_historia.php" // Reemplaza con tu IP
             return try {
                 URL(urlString).readText()
             } catch (e: Exception) {
@@ -68,7 +73,9 @@ class VerHistoriaActivity : AppCompatActivity() {
                             jsonObject.getInt("HistoriaID"),
                             jsonObject.getString("Titulo"),
                             jsonObject.getString("Descripcion"),
-                            jsonObject.getString("Imagen")
+                            jsonObject.getString("Imagen"),
+                            jsonObject.getDouble("Latitud"), // Obtén la latitud del JSON
+                            jsonObject.getDouble("Longitud") // Obtén la longitud del JSON
                         )
                         historias.add(historia)
                     }
@@ -91,6 +98,16 @@ class HistoriaAdapter(private var historias: List<Historia>) : RecyclerView.Adap
         val tituloTextView: TextView = itemView.findViewById(R.id.tituloTextView)
         val descripcionTextView: TextView = itemView.findViewById(R.id.descripcionTextView)
         val imagenImageView: ImageView = itemView.findViewById(R.id.imagenImageView)
+        val btnVerUbicacion: Button = itemView.findViewById(R.id.btnVerUbicacion) //boton para mandar la ubicacion al intent
+    }
+
+    //Segun se mandan las coordenadas obtenidas al intent de google maps
+    fun verUbicacion(context: Context, latitud: Double, longitud: Double) {
+        val intent = Intent(context, MapsActivity::class.java).apply {
+            putExtra("latitud", latitud)
+            putExtra("longitud", longitud)
+        }
+        context.startActivity(intent)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -102,6 +119,11 @@ class HistoriaAdapter(private var historias: List<Historia>) : RecyclerView.Adap
         val historia = historias[position]
         holder.tituloTextView.text = historia.titulo
         holder.descripcionTextView.text = historia.descripcion
+
+        //
+        holder.btnVerUbicacion.setOnClickListener {
+            verUbicacion(holder.itemView.context, historia.latitud, historia.longitud)
+        }
 
         // Carga la imagen desde el Base64
         val decodedString = Base64.decode(historia.imagenBase64, Base64.DEFAULT)

@@ -23,4 +23,12 @@
         android:layout_height="200dp"
         android:layout_marginTop="8dp"/>
 
+    <!-- Boton para ver ubicacion -->
+    <Button
+        android:id="@+id/btnVerUbicacion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ver Ubicación"
+        android:onClick="verUbicacion"/>
+
 </LinearLayout>

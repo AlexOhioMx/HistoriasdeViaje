@@ -42,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
             var response = ""
             try {
                 // Cambia la URL por la de tu servidor
-                val url = URL("http://192.168.1.20:80/inicio_sesion.php")
+                val url = URL("http://192.168.0.12:80/inicio_sesion.php")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json;charset=utf-8")
