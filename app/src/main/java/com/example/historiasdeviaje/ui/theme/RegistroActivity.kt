@@ -45,7 +45,7 @@ class RegistroActivity : AppCompatActivity() {
             var response = ""
             try {
                 //Cambia la url también
-                val url = URL("http://192.168.0.38:80/registro_usuario.php")
+                val url = URL("http://192.168.1.20:80/registro_usuario.php")
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json;charset=utf-8")

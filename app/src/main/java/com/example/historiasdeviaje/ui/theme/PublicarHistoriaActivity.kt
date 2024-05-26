@@ -1,17 +1,20 @@
 package com.example.historiasdeviaje.ui.theme
 
+import android.Manifest
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.historiasdeviaje.R
@@ -30,6 +33,27 @@ class PublicarHistoriaActivity : AppCompatActivity() {
     lateinit var imagenHistoria: ImageView
     lateinit var botonSubirFotos: Button
     lateinit var botonPublicar: Button
+    lateinit var botonTomarFoto: Button
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                abrirCamara()
+            } else {
+                Toast.makeText(this, "Se necesita el permiso de la cámara", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data: Intent? = result.data
+            if (data != null && data.extras != null) {
+                val imageBitmap = data.extras!!.get("data") as Bitmap
+                uriFoto = getImageUriFromBitmap(imageBitmap)
+                Glide.with(this).load(uriFoto).into(imagenHistoria)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +64,7 @@ class PublicarHistoriaActivity : AppCompatActivity() {
         imagenHistoria = findViewById(R.id.imagen_historia)
         botonSubirFotos = findViewById(R.id.boton_subir_fotos)
         botonPublicar = findViewById(R.id.boton_publicar)
+        botonTomarFoto = findViewById(R.id.boton_tomar_foto)
 
         botonSubirFotos.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -49,30 +74,36 @@ class PublicarHistoriaActivity : AppCompatActivity() {
             startActivityForResult(intent, REQUEST_CODE)
         }
 
+        botonTomarFoto.setOnClickListener {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+
         botonPublicar.setOnClickListener {
-            uriFoto?.let { uri ->
-                // Obtener el input stream de la Uri
-                val inputStream = contentResolver.openInputStream(uri)
+            if (uriFoto != null) {
+                val inputStream = contentResolver.openInputStream(uriFoto!!)
                 val bitmap = BitmapFactory.decodeStream(inputStream)
                 val imagenBase64 = bitmapToBase64(bitmap)
 
                 val titulo = tituloHistoria.text.toString()
                 val descripcion = descripcionHistoria.text.toString()
 
-                // Llamada a la función para insertar en la base de datos
                 insertarPublicacion(titulo, descripcion, imagenBase64)
 
-                // Redirigir a VerHistoriaActivity DESPUÉS de insertar
                 val intent = Intent(this, VerHistoriaActivity::class.java).apply {
                     putExtra("TITULO", titulo)
                     putExtra("DESCRIPCION", descripcion)
                     putExtra("URI_FOTO", uriFoto.toString())
                 }
                 startActivity(intent)
-            } ?: run {
+            } else {
                 Toast.makeText(this, "Por favor, selecciona una imagen", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun abrirCamara() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        resultLauncher.launch(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -84,54 +115,69 @@ class PublicarHistoriaActivity : AppCompatActivity() {
     }
 
     private fun insertarPublicacion(titulo: String, descripcion: String, imagenBase64: String) {
-        InsertarPublicacionTask().execute(titulo, descripcion, imagenBase64)
+        InsertarPublicacionTask().execute(
+            JSONObject().apply {
+                put("titulo", titulo)
+                put("descripcion", descripcion)
+                put("imagen", imagenBase64)
+            }.toString()
+        )
     }
 
     inner class InsertarPublicacionTask : AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String {
+            var response = ""
             try {
-                // Conexión a tu base de datos MySQL (reemplaza con tu configuración)
-                val url = URL("http://192.168.0.38:80/insertar_publicacion.php")
+                val url = URL("http://192.168.1.20:80/insertar_publicacion.php") // Reemplaza con tu IP
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
                 conn.doOutput = true
 
-                // Datos en formato JSON
-                val json = JSONObject().apply {
-                    put("titulo", params[0])
-                    put("descripcion", params[1])
-                    put("imagen", params[2])
-                }
-
-                // Envío de datos al servidor
+                // Enviar el JSON al servidor
                 val os = OutputStreamWriter(conn.outputStream)
-                os.write(json.toString())
+                os.write(params[0]) // Enviar el JSON completo
                 os.flush()
                 os.close()
 
-                // Obtener respuesta del servidor
-                return conn.inputStream.bufferedReader().use { it.readText() }
+                // Lee la respuesta del servidor
+                if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                    response = conn.inputStream.bufferedReader().use { it.readText() }
+                }
             } catch (e: Exception) {
                 Log.e("InsertarPublicacionTask", "Error: ${e.message}")
-                return "Error"
+                return "Error: ${e.message}" // Devuelve el mensaje de error completo
             }
+            return response
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            if (result == "Success") {
-                Toast.makeText(this@PublicarHistoriaActivity, "Publicación exitosa", Toast.LENGTH_SHORT).show()
-                // Aquí podrías redirigir a otra actividad si lo deseas
+            Log.d("InsertarPublicacionTask", "Respuesta del servidor: $result")
+            val jsonResponse = JSONObject(result)
+            if (jsonResponse.optString("status") == "Success") {
+                // Publicación exitosa, redirige a VerHistoriaActivity
+                val intent = Intent(this@PublicarHistoriaActivity, VerHistoriaActivity::class.java)
+                startActivity(intent)
             } else {
-                Toast.makeText(this@PublicarHistoriaActivity, "Error al publicar", Toast.LENGTH_SHORT).show()
+                // Hubo un error, muestra el mensaje en un Toast
+                val errorMessage = jsonResponse.optString("message", "Error desconocido")
+                Toast.makeText(this@PublicarHistoriaActivity, errorMessage, Toast.LENGTH_LONG).show()
             }
         }
     }
+
     private fun bitmapToBase64(bitmap: Bitmap): String {
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
         val byteArray = byteArrayOutputStream.toByteArray()
         return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    private fun getImageUriFromBitmap(bitmap: Bitmap): Uri {
+        val bytes = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path = MediaStore.Images.Media.insertImage(contentResolver, bitmap, "Title", null)
+        return Uri.parse(path.toString())
     }
 }
