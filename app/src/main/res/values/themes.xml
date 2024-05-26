@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.HistoriasdeViaje" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.HistoriasdeViaje" parent="Theme.MaterialComponents.DayNight">
         <!-- Personaliza tu tema aquí. -->
     </style>
 </resources>
